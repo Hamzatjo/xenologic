@@ -3,1740 +3,596 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xenologic: Logic You Can Trust</title>
-    <meta name="description" content="Xenologic builds a pluggable reasoning engine for real-world applications. Reliable, traceable answers to complex logical questions. No hallucinations.">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+    <title>White Room Engine — Research Showcase</title>
+    <meta name="description" content="A 1.74B parameter transformer trained from scratch on synthetic symbolic reasoning puzzles. Can a neural network learn to reason without memorizing?">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
         :root {
             --bg: #0a0a0f;
             --bg-card: #12121a;
-            --bg-card-hover: #1a1a25;
-            --border: #1e1e2e;
-            --text: #e4e4e7;
-            --text-dim: #71717a;
-            --text-bright: #fafafa;
-            --accent: #0ea5e9;
-            --accent-glow: rgba(14, 165, 233, 0.15);
-            --accent-2: #14b8a6;
-            --green: #22c55e;
+            --bg-code: #0d0d14;
+            --border: #1a1a2e;
+            --accent: #6366f1;
+            --accent-dim: #4f46e5;
+            --green: #10b981;
+            --red: #ef4444;
+            --yellow: #f59e0b;
+            --text: #e2e8f0;
+            --text-dim: #94a3b8;
+            --text-bright: #f8fafc;
         }
-
-        html { scroll-behavior: smooth; }
-
-        /* Custom scrollbars for all scrollable elements */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-        ::-webkit-scrollbar-corner { background: transparent; }
-
-        /* Firefox */
-        * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Inter', sans-serif;
             background: var(--bg);
             color: var(--text);
-            line-height: 1.6;
+            line-height: 1.7;
             overflow-x: hidden;
         }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
 
-        /* ─── Noise overlay ─── */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 9999;
-        }
-
-        /* ─── Nav ─── */
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 1.25rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
-            backdrop-filter: blur(12px);
-            background: rgba(10, 10, 15, 0.8);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .logo {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-bright);
-            text-decoration: none;
-            letter-spacing: -0.02em;
-        }
-
-        .logo span { color: var(--accent); }
-
-        .nav-links { display: flex; gap: 2rem; align-items: center; }
-
-        .nav-links a {
-            color: var(--text-dim);
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover { color: var(--text-bright); }
-
-        .nav-cta {
-            padding: 0.5rem 1.25rem;
-            background: var(--accent);
-            color: white !important;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .nav-cta:hover { background: var(--accent-2); transform: translateY(-1px); }
-
-        /* ─── Hero ─── */
+        /* Hero */
         .hero {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            padding: 8rem 0 5rem;
             text-align: center;
-            padding: 8rem 2rem 4rem;
             position: relative;
         }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -20%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 800px;
-            height: 800px;
-            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
         .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.375rem 1rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border: 1px solid var(--accent-dim);
             border-radius: 100px;
             font-size: 0.8rem;
-            color: var(--text-dim);
+            color: var(--accent);
             margin-bottom: 2rem;
-            animation: fadeUp 0.6s ease-out;
+            font-family: 'JetBrains Mono', monospace;
         }
-
-        .hero-badge .dot {
-            width: 6px;
-            height: 6px;
-            background: var(--green);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .hero-h1-wrapper {
-            height: 140px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-            animation: fadeUp 0.6s ease-out 0.1s both;
-        }
-
-        @media (max-width: 768px) {
-            .hero-h1-wrapper { height: 100px; }
-        }
-
         .hero h1 {
-            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-size: clamp(2.5rem, 5vw, 4rem);
             font-weight: 700;
             color: var(--text-bright);
-            line-height: 1.1;
-            letter-spacing: -0.03em;
-            max-width: 800px;
-            margin: 0;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
         }
-
-        .hero h1 .gradient {
-            background: linear-gradient(135deg, var(--accent), var(--accent-2), #06b6d4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
         .hero p {
             font-size: 1.2rem;
             color: var(--text-dim);
-            max-width: 560px;
-            line-height: 1.7;
-            margin-bottom: 2.5rem;
-            animation: fadeUp 0.6s ease-out 0.2s both;
+            max-width: 700px;
+            margin: 0 auto 3rem;
         }
 
-        .hero-actions {
-            display: flex;
-            gap: 1rem;
-            animation: fadeUp 0.6s ease-out 0.3s both;
-        }
-
-        .btn {
-            padding: 0.75rem 2rem;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.25s;
-            cursor: pointer;
-            border: none;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-            box-shadow: 0 0 20px var(--accent-glow);
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-2);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 30px var(--accent-glow);
-        }
-
-        .btn-secondary {
-            background: var(--bg-card);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        /* ─── Sections ─── */
-        section {
-            padding: 6rem 2rem;
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .section-label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--accent);
-            margin-bottom: 1rem;
-        }
-
-        .section-title {
-            font-size: clamp(1.75rem, 3.5vw, 2.5rem);
-            font-weight: 700;
-            color: var(--text-bright);
-            letter-spacing: -0.02em;
-            margin-bottom: 1rem;
-        }
-
-        .section-desc {
-            font-size: 1.05rem;
-            color: var(--text-dim);
-            max-width: 600px;
-            line-height: 1.7;
-            margin-bottom: 3rem;
-        }
-
-        /* ─── Cards grid ─── */
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.25rem;
-        }
-
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            transition: all 0.3s;
-        }
-
-        .card:hover {
-            border-color: var(--accent);
-            background: var(--bg-card-hover);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 40px rgba(14, 165, 233, 0.08);
-        }
-
-        .card-icon {
-            font-size: 1.75rem;
-            margin-bottom: 1rem;
-        }
-
-        .card h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-bright);
-            margin-bottom: 0.5rem;
-        }
-
-        .card p {
-            font-size: 0.9rem;
-            color: var(--text-dim);
-            line-height: 1.6;
-        }
-
-        /* ─── Stats ─── */
+        /* Stats bar */
         .stats {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.25rem;
-            margin: 4rem 0;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin: 3rem 0;
         }
-
-        .stat {
-            text-align: center;
-            padding: 2rem 1rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-        }
-
+        .stat { text-align: center; }
         .stat-value {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 700;
             color: var(--text-bright);
             font-family: 'JetBrains Mono', monospace;
         }
-
         .stat-label {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--text-dim);
-            margin-top: 0.25rem;
+            margin-top: 0.3rem;
         }
 
-        /* ─── Code block ─── */
-        .code-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 3rem;
-            align-items: center;
+        /* Sections */
+        .section {
+            padding: 5rem 0;
+        }
+        .section-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-bright);
+            margin-bottom: 1rem;
+        }
+        .section-desc {
+            color: var(--text-dim);
+            max-width: 700px;
+            margin-bottom: 3rem;
+            font-size: 1.05rem;
         }
 
-        .code-block {
-            background: #0d0d14;
+        /* Cards */
+        .card {
+            background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .card h3 {
+            font-size: 1.2rem;
+            color: var(--text-bright);
+            margin-bottom: 0.5rem;
+        }
+        .card p { color: var(--text-dim); }
+        .card-tag {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 1rem;
+        }
+        .tag-success { background: rgba(16, 185, 129, 0.15); color: var(--green); }
+        .tag-fail { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+        .tag-info { background: rgba(99, 102, 241, 0.15); color: var(--accent); }
+
+        /* Code/trace blocks */
+        .trace {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 8px;
             padding: 1.5rem;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.8rem;
             line-height: 1.8;
-            overflow-x: hidden;
-            color: var(--text-dim);
+            overflow-x: auto;
+            margin: 1.5rem 0;
         }
+        .trace .kw { color: var(--accent); }
+        .trace .var { color: var(--yellow); }
+        .trace .true { color: var(--green); }
+        .trace .false { color: var(--red); }
+        .trace .dim { color: var(--text-dim); }
+        .trace .answer { color: var(--text-bright); font-weight: 600; }
 
-        .code-block .keyword { color: var(--accent); }
-        .code-block .token { color: #22c55e; }
-        .code-block .entity { color: #f59e0b; }
-        .code-block .comment { color: #3f3f5a; }
-
-        /* ─── Terminal hero animation ─── */
-        .hero-terminal-wrapper{display:flex;gap:1.5rem;width:100%;max-width:900px;margin:2.5rem auto 0;align-items:stretch;animation:fadeUp .6s ease-out .4s both;position:relative;z-index:1}
-        .hero-annotations{width:200px;flex-shrink:0;display:flex;flex-direction:column;gap:.75rem;padding-top:.5rem}
-        .example-selector{display:flex;gap:.5rem;justify-content:center;margin-bottom:.75rem}
-        .example-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--bg-card);color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:.8rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
-        .example-btn:hover{border-color:var(--accent);color:var(--text-bright)}
-        .example-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
-        .example-btn.disabled{opacity:.35;cursor:default;pointer-events:none}
-        .hero-annotation{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;font-size:.75rem;color:var(--text-dim);line-height:1.5;opacity:.3;transition:all .4s ease;transform:translateX(5px);cursor:pointer}
-        .hero-annotation:hover{border-color:rgba(14,165,233,.4);opacity:.6}
-        .hero-annotation.active{opacity:1;border-color:var(--accent);transform:translateX(0)}
-        .hero-annotation strong{color:var(--text-bright);display:block;margin-bottom:.25rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em}
-        @media(max-width:768px){.hero-terminal-wrapper{flex-direction:column}.hero-annotations{width:100%;flex-direction:row;overflow-x:auto;gap:.5rem}}
-
-        /* ─── Proof of concept / results tabs ─── */
-        .poc-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
+        /* Type grid */
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
         }
-
-        .poc-tab {
-            padding: 0.5rem 1.25rem;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            border: 1px solid var(--border);
+        .type-item {
             background: var(--bg-card);
-            color: var(--text-dim);
-            transition: all 0.2s;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+        .type-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text);
+        }
+        .type-status {
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+        .status-pass { background: rgba(16, 185, 129, 0.15); color: var(--green); }
+        .status-fail { background: rgba(239, 68, 68, 0.15); color: var(--red); }
 
-        .poc-tab:hover { border-color: var(--accent); color: var(--text); }
-        .poc-tab.active { background: var(--bg-card-hover); color: var(--text-bright); border-color: var(--border); border-bottom: 2px solid var(--accent-2); }
-
-        .poc-panel { display: none; }
-        .poc-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
-
-        .poc-trace {
-            background: #0d0d14;
+        /* Real-world section */
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .scenario {
+            background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.25rem 1.5rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            line-height: 2;
-            overflow-x: hidden;
-            white-space: pre-wrap;
+            padding: 2rem;
         }
-
-        .poc-trace .kw { color: var(--accent); }
-        .poc-trace .ent { color: #f59e0b; }
-        .poc-trace .tr { color: #22c55e; }
-        .poc-trace .fa { color: #ef4444; }
-        .poc-trace .cm { color: #3f3f5a; }
-        .poc-trace .st { color: var(--accent-2); }
-        .poc-trace .hi { color: var(--text-bright); font-weight: 600; }
-
-        .poc-explain {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
-
-        .poc-explain h4 {
-            font-size: 1rem;
-            font-weight: 600;
+        .scenario h4 {
             color: var(--text-bright);
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
         }
-
-        .poc-explain p {
-            font-size: 0.9rem;
-            color: var(--text-dim);
-            line-height: 1.7;
-        }
-
-        .poc-result {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.4rem 1rem;
-            border-radius: 8px;
+        .scenario .mapping {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: 0.25rem;
-        }
-
-        .poc-result.true { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #22c55e; }
-        .poc-result.insuf { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; }
-
-        .poc-highlight {
-            padding: 0.75rem 1rem;
-            background: rgba(14,165,233,0.06);
-            border-left: 3px solid var(--accent);
-            border-radius: 0 8px 8px 0;
-            font-size: 0.85rem;
             color: var(--text-dim);
-            line-height: 1.6;
+            margin-top: 1rem;
+            line-height: 2;
         }
+        .scenario .mapping span { color: var(--yellow); }
 
-        .poc-highlight strong { color: var(--text-bright); }
-
-        @media (max-width: 768px) {
-            .poc-panel.active { grid-template-columns: 1fr; }
-        }
-
-        /* ─── Research / follow section ─── */
-        .research-section {
-            text-align: center;
-            padding: 6rem 2rem;
-            position: relative;
-        }
-
-        .research-section::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 600px;
-            height: 400px;
-            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .research-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.375rem 1rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 100px;
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            margin-bottom: 2rem;
-        }
-
-        /* ─── CTA ─── */
-        .cta-section {
-            text-align: center;
-            padding: 6rem 2rem;
-            position: relative;
-        }
-
-        .cta-section::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 600px;
-            height: 400px;
-            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        /* ─── Footer ─── */
+        /* Footer */
         footer {
-            padding: 3rem 2rem;
+            padding: 4rem 0;
             border-top: 1px solid var(--border);
             text-align: center;
             color: var(--text-dim);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
 
-        footer a { color: var(--text-dim); text-decoration: none; }
-        footer a:hover { color: var(--accent); }
-
-        /* ─── Alien particles ─── */
-        .alien-particles {
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .alien-particle {
-            position: absolute;
-            font-size: 1rem;
-            color: var(--accent);
-            opacity: 0.12;
-            animation: drift linear infinite;
-            font-family: 'JetBrains Mono', monospace;
-            user-select: none;
-        }
-
-        @keyframes drift {
-            0%   { transform: translate(0, 0) rotate(0deg); opacity: 0; }
-            10%  { opacity: 0.12; }
-            90%  { opacity: 0.12; }
-            100% { transform: translate(var(--dx), var(--dy)) rotate(var(--dr)); opacity: 0; }
-        }
-
-        .hero-terminal{background:#0d0d14;border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative;box-shadow:0 0 30px rgba(14,165,233,.06);min-width:520px;width:100%}
-        .term-pause-btn{position:absolute;bottom:.6rem;right:.6rem;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.15);color:rgba(255,255,255,.3);border-radius:6px;width:26px;height:26px;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;z-index:10;padding:0;line-height:1}
-        .term-pause-btn:hover{background:rgba(14,165,233,.18);border-color:rgba(14,165,233,.4);color:rgba(255,255,255,.8)}
-        .term-body{padding:1.25rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.8;min-height:300px;color:var(--text-dim);overflow-x:hidden}
-        .term-body .t-kw{color:var(--accent)}
-        .term-body .t-ent{color:#f59e0b}
-        .term-body .t-true{color:#22c55e}
-        .term-body .t-false{color:#ef4444}
-        .term-body .t-dim{color:#555}
-        .term-body .t-bright{color:var(--text-bright)}
-        .term-body .t-answer{color:#22c55e;font-weight:600;font-size:.9rem}
-        .term-source-doc{margin-top:.6rem;padding:.6rem .75rem .6rem 12px;border-left:2px solid rgba(14,165,233,0.3);background:rgba(14,165,233,0.03);border-radius:0 6px 6px 0}
-        .term-doc-header{margin-bottom:.3rem}
-        .term-doc-emoji{font-style:normal}
-        .term-doc-title{color:rgba(228,228,231,0.6);font-size:.75rem}
-        .term-doc-line{color:rgba(113,113,122,0.85);font-size:.73rem;font-style:italic;line-height:1.7}
-        .term-cursor{display:inline-block;width:8px;height:15px;background:var(--accent);animation:blink 1s step-end infinite;vertical-align:middle;margin-left:2px}
-        @keyframes blink{50%{opacity:0}}
-
-        /* ─── Animations ─── */
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .fade-in {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.6s ease-out;
-        }
-
-        .fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* ─── Hamburger ─── */
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            gap: 5px;
-            cursor: pointer;
-            padding: 4px;
-            background: none;
-            border: none;
-        }
-
-        .hamburger span {
-            display: block;
-            width: 22px;
-            height: 2px;
-            background: var(--text);
-            border-radius: 2px;
-            transition: all 0.25s ease;
-        }
-
-        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-        .hamburger.open span:nth-child(2) { opacity: 0; }
-        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-        /* ─── Responsive ─── */
         @media (max-width: 768px) {
-            .hamburger { display: flex; }
-
-            .nav-links {
-                display: none;
-                position: fixed;
-                top: 61px;
-                left: 0;
-                right: 0;
-                flex-direction: column;
-                gap: 0;
-                background: rgba(10, 10, 15, 0.97);
-                backdrop-filter: blur(12px);
-                border-bottom: 1px solid var(--border);
-                padding: 1rem 0;
-            }
-
-            .nav-links.open { display: flex; }
-
-            .nav-links a {
-                padding: 0.85rem 2rem;
-                font-size: 1rem;
-            }
-
-            .nav-cta {
-                margin: 0.5rem 2rem 0;
-                text-align: center;
-                border-radius: 8px;
-            }
-
+            .hero { padding: 5rem 0 3rem; }
             .stats { grid-template-columns: repeat(2, 1fr); }
-            .code-section { grid-template-columns: 1fr; }
-            .hero-actions { flex-direction: column; align-items: center; }
-
-            .hero { padding: 6rem 1rem 2rem; min-height: auto; }
-            .hero p { font-size: 1rem; }
-
-            .hero-terminal-wrapper {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .hero-terminal {
-                min-width: 0 !important;
-                width: 100%;
-            }
-
-            .term-body {
-                font-size: 0.65rem;
-                line-height: 1.7;
-                padding: 1rem;
-                min-height: 220px;
-                overflow-x: auto;
-                word-break: break-word;
-            }
-
-            .hero-annotations {
-                width: 100%;
-                flex-direction: row;
-                overflow-x: auto;
-                gap: 0.5rem;
-                padding: 0 0 0.5rem;
-                -webkit-overflow-scrolling: touch;
-            }
-
-            .hero-annotation {
-                min-width: 140px;
-                flex-shrink: 0;
-                font-size: 0.7rem;
-                padding: 0.6rem 0.75rem;
-            }
-
-            .example-selector { margin-bottom: 0.5rem; }
-
-            section { padding: 3rem 1rem; }
-
-            .section-title { font-size: 1.5rem; }
-            .section-desc { font-size: 0.95rem; }
-
-            .cards { grid-template-columns: 1fr; gap: 1rem; }
-            .card { padding: 1.5rem; }
-
-            .poc-tabs { gap: 0.35rem; }
-            .poc-tab { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
-
-            .poc-panel.active { grid-template-columns: 1fr; gap: 1.25rem; }
-
-            .poc-trace {
-                font-size: 0.65rem;
-                line-height: 1.8;
-                padding: 1rem;
-                overflow-x: auto;
-            }
-
-            .code-block {
-                font-size: 0.7rem;
-                padding: 1rem;
-                overflow-x: auto;
-            }
-
-            .stat-value { font-size: 1.5rem; }
-
-            .term-source-doc { padding: 0.5rem 0.6rem 0.5rem 8px; }
-            .term-doc-line { font-size: 0.65rem; }
-        }
-
-        @media (max-width: 380px) {
-            .hero h1 { font-size: 2rem; }
-            .hero-h1-wrapper { height: 70px; }
-            .term-body { font-size: 0.6rem; min-height: 200px; }
-            .btn { padding: 0.65rem 1.5rem; font-size: 0.85rem; }
+            .type-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <nav>
-        <a href="#" class="logo">xeno<span>logic</span></a>
-        <div class="nav-links" id="nav-links">
-            <a href="#problem">Problem</a>
-            <a href="#poc">Results</a>
-            <a href="#research">Research</a>
-        </div>
-        <button class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-links">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-    </nav>
+    <div class="container">
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-badge">Active Research · 1.74B Parameters · TPU-trained</div>
+            <h1>White Room Engine V3</h1>
+            <p>A transformer trained from scratch on synthetic symbolic reasoning puzzles. No natural language. No memorization. Just logic. Can it actually learn to reason?</p>
+        </section>
 
-    <section class="hero">
-        <div class="alien-particles" id="alien-particles"></div>
-        <div class="hero-badge">
-            <span class="dot"></span>
-            Active R&amp;D: reasoning you can verify
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">1.74B</div>
+                <div class="stat-label">Parameters (AttnRes architecture)</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">200</div>
+                <div class="stat-label">Static variables (v0–v199)</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">18/30</div>
+                <div class="stat-label">Types at 100% exact match</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">203K</div>
+                <div class="stat-label">Pre-training steps on TPU</div>
+            </div>
         </div>
-        <div class="hero-h1-wrapper">
-            <h1 id="hero-title">Logic you can <span class="gradient">trust</span></h1>
-        </div>
-        <p>Building AI that derives answers through verifiable logic, not pattern matching.</p>
 
-        <!-- ── Terminal pipeline animation ── -->
-        <div class='example-selector' id='example-selector'>
-          <button class='example-btn active' data-example='0'>1</button>
-          <button class='example-btn' data-example='1'>2</button>
-          <button class='example-btn' data-example='2'>3</button>
-        </div>
-        <div class='hero-terminal-wrapper'>
-          <div class='hero-terminal' id='hero-terminal'>
-            <div class='term-body' id='term-body'></div>
-            <button class='term-pause-btn' id='term-pause-btn' title='Pause/Resume'>⏸</button>
-          </div>
-          <div class='hero-annotations' id='hero-annotations'>
-            <div class='hero-annotation' id='ann-input'><strong>Input</strong>Plain English facts and retrieved policy rules. No special formatting needed.</div>
-            <div class='hero-annotation' id='ann-compile'><strong>Compile</strong>Facts and relationships are mapped to logical variables and structured into rules.</div>
-            <div class='hero-annotation' id='ann-trc'><strong>[TRC] = Trace</strong>The engine chains through rules step by step. Each conclusion is traceable.</div>
-            <div class='hero-annotation' id='ann-answer'><strong>Answer</strong>The derived answer is translated back. Two logical hops: scene + motive → person of interest → prime suspect.</div>
-          </div>
-        </div>
-        <p style="font-style: italic; font-size: 0.8rem; color: var(--text-dim); margin-top: 1rem; opacity: 0.7;">This demo illustrates the pipeline we are building. The full system (compiler + reasoning engine + knowledge retrieval) is under active development.</p>
-    </section>
+        <!-- How it works -->
+        <section class="section">
+            <h2 class="section-title">How it works</h2>
+            <p class="section-desc">The model uses 200 static symbolic variables (v0–v199). The same names appear in every puzzle, randomly assigned to roles. It can't memorize associations — it has to learn the abstract reasoning structure itself.</p>
 
-    <section id="problem" class="fade-in">
-        <div class="section-label">The Problem</div>
-        <div class="section-title">Current AI hallucinates. High-stakes decisions can't.</div>
-        <div class="section-desc">Every major LLM is a pattern-matching engine trained to sound right. In casual use, that's fine. In legal, medical, compliance, or financial contexts, where a wrong answer has real consequences, it's a liability.</div>
-
-        <div class="cards">
             <div class="card">
-                <div class="card-icon">⚠️</div>
-                <h3>Hallucination is structural, not a bug</h3>
-                <p>Language models generate plausible text. They don't verify it. When a question requires multi-step logical reasoning, they guess, confidently and incorrectly.</p>
+                <span class="card-tag tag-info">Architecture</span>
+                <h3>AttnRes — Attention over Depth Residuals</h3>
+                <p>Instead of fixed residual accumulation, AttnRes uses softmax attention over depth. Each layer can dynamically route information from any previous block, enabling multi-hop reasoning chains without information dilution.</p>
             </div>
             <div class="card">
-                <div class="card-icon">🔍</div>
-                <h3>No traceability</h3>
-                <p>You can't audit how a chatbot reached its answer. In regulated industries, that's a non-starter. You need to show your work, not just produce an output.</p>
+                <span class="card-tag tag-info">Training</span>
+                <h3>JAX/Flax on Google TPU Research Cloud</h3>
+                <p>8-chip data parallelism on TPU v6e. 203,450 pre-training steps, followed by SFT (2 epochs, 147K sequences) and GRPO reinforcement learning (v1–v8). All training data generated and verified by formal solvers — zero label errors.</p>
             </div>
             <div class="card">
-                <div class="card-icon">🔌</div>
-                <h3>Not built for your workflow</h3>
-                <p>General-purpose AI isn't designed to plug into domain-specific pipelines. You need something that takes your rules, your documents, your facts, and reasons over them reliably.</p>
+                <span class="card-tag tag-info">Design</span>
+                <h3>Zero memorization by construction</h3>
+                <p>200 static variables, randomly assigned per puzzle. No entity names, no natural language, no world knowledge. If the model gets the right answer, it's because it followed the logical chain — not because it remembered something from training.</p>
+            </div>
+        </section>
+
+        <!-- Working types -->
+        <section class="section">
+            <h2 class="section-title">What works: 100% exact match</h2>
+            <p class="section-desc">These reasoning types are solved perfectly. The model produces the exact correct state for every variable, every time.</p>
+
+            <!-- Backward Chain -->
+            <div class="card">
+                <span class="card-tag tag-success">100% EM</span>
+                <h3>Backward Chaining</h3>
+                <p>Given a query, work backwards through the rule chain to determine if it can be proven. Requires tracking which facts are needed and whether they're available.</p>
+                <div class="trace">
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v8</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="var">v7</span> <span class="true">[TRUE]</span>
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v154</span> <span class="true">[TRUE]</span> <span class="kw">[AND]</span> <span class="var">v6</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="var">v143</span> <span class="true">[TRUE]</span>
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v143</span> <span class="true">[TRUE]</span> <span class="kw">[AND]</span> <span class="var">v179</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="var">v139</span> <span class="true">[TRUE]</span>
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v139</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="var">v107</span> <span class="true">[TRUE]</span>
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v107</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="var">v50</span> <span class="true">[TRUE]</span>
+<span class="dim">... 5 more rules</span>
+<span class="kw">[GIVEN]</span> <span class="var">v6</span> <span class="true">[TRUE]</span>, <span class="var">v179</span> <span class="true">[TRUE]</span>, <span class="var">v8</span> <span class="true">[TRUE]</span>, <span class="var">v55</span> <span class="false">[FALSE]</span>
+<span class="kw">[QUERY]</span> <span class="var">v154</span>
+
+<span class="dim">── Reasoning trace ──</span>
+<span class="kw">[TRC]</span> 1 <span class="var">v55</span> <span class="false">[FALSE]</span> <span class="dim">[GIVEN]</span>
+<span class="kw">[TRC]</span> 2 <span class="var">v23</span> <span class="false">[FALSE]</span> <span class="dim">[BACKTRACK]</span>
+<span class="kw">[TRC]</span> 3 <span class="var">v166</span> <span class="false">[FALSE]</span> <span class="dim">[BACKTRACK]</span>
+<span class="kw">[TRC]</span> ... chain continues ...
+<span class="kw">[TRC]</span> 11 <span class="var">v154</span> <span class="false">[FALSE]</span> <span class="dim">[BACKTRACK]</span>
+
+<span class="answer">Answer: v154 [FALSE]</span>
+                </div>
+                <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: 1rem;">The model traces backwards through 11 steps, determining that v154 cannot be proven TRUE because the chain depends on v55 which is given as FALSE.</p>
+            </div>
+
+            <!-- Causal Chain -->
+            <div class="card">
+                <span class="card-tag tag-success">100% EM</span>
+                <h3>Causal Reasoning</h3>
+                <p>Multi-hop causal chains with branching effects. The model must propagate causes through a network of rules, handling both positive and negative effects.</p>
+                <div class="trace">
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v138</span> <span class="true">[TRUE]</span> <span class="kw">[AND]</span> <span class="var">v3</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="var">v23</span> <span class="true">[TRUE]</span>
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v23</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="var">v71</span> <span class="false">[FALSE]</span>
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v63</span> <span class="false">[FALSE]</span> <span class="kw">[THEN]</span> <span class="var">v166</span> <span class="true">[TRUE]</span>
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v166</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="var">v140</span> <span class="false">[FALSE]</span>
+<span class="dim">... 6 more rules</span>
+<span class="kw">[GIVEN]</span> <span class="var">v138</span> <span class="true">[TRUE]</span>, <span class="var">v3</span> <span class="true">[TRUE]</span>, <span class="var">v118</span> <span class="false">[FALSE]</span>, <span class="var">v60</span> <span class="true">[TRUE]</span>
+<span class="kw">[QUERY]</span> <span class="var">v140</span>
+
+<span class="dim">── Reasoning trace ──</span>
+<span class="kw">[TRC]</span> 1 <span class="var">v138</span> <span class="true">[TRUE]</span> + <span class="var">v3</span> <span class="true">[TRUE]</span> → <span class="var">v23</span> <span class="true">[TRUE]</span> <span class="dim">[YIELDS]</span>
+<span class="kw">[TRC]</span> 2 <span class="var">v23</span> → <span class="var">v71</span> <span class="false">[FALSE]</span> <span class="dim">[YIELDS]</span>
+<span class="kw">[TRC]</span> 3 <span class="var">v63</span> <span class="false">[FALSE]</span> → <span class="var">v166</span> <span class="true">[TRUE]</span> <span class="dim">[YIELDS]</span>
+<span class="kw">[TRC]</span> 4 <span class="var">v166</span> → <span class="var">v140</span> <span class="false">[FALSE]</span> <span class="dim">[YIELDS]</span>
+
+<span class="answer">Answer: v140 [FALSE]</span>
+                </div>
+                <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: 1rem;">A 4-hop causal chain: v138+v3 causes v23, which negates v71, which (via default) makes v63 FALSE, which triggers v166, which finally negates v140.</p>
+            </div>
+
+            <!-- Spatial Flood -->
+            <div class="card">
+                <span class="card-tag tag-success">100% EM</span>
+                <h3>Spatial Flood Fill</h3>
+                <p>Graph reachability via flood propagation. Given active source nodes and an adjacency graph, determine which nodes become active through spreading activation.</p>
+                <div class="trace">
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="kw">[ACTIVE]</span> <span class="kw">[AND]</span> <span class="kw">[ADJACENT]</span> <span class="kw">[THEN]</span> <span class="true">[TRUE]</span>
+<span class="kw">[RULE]</span> <span class="var">v49</span> <span class="kw">[ADJACENT]</span> <span class="var">v103</span>
+<span class="kw">[RULE]</span> <span class="var">v103</span> <span class="kw">[ADJACENT]</span> <span class="var">v75</span>
+<span class="kw">[RULE]</span> <span class="var">v75</span> <span class="kw">[ADJACENT]</span> <span class="var">v107</span>
+<span class="kw">[RULE]</span> <span class="var">v49</span> <span class="kw">[ADJACENT]</span> <span class="var">v173</span>
+<span class="kw">[RULE]</span> <span class="var">v173</span> <span class="kw">[ADJACENT]</span> <span class="var">v97</span>
+<span class="kw">[RULE]</span> <span class="var">v97</span> <span class="kw">[ADJACENT]</span> <span class="var">v107</span>
+<span class="kw">[GIVEN]</span> <span class="var">v49</span> <span class="true">[TRUE]</span>
+<span class="kw">[QUERY]</span> <span class="var">v107</span>
+
+<span class="dim">── Reasoning trace ──</span>
+<span class="kw">[TRC]</span> 1 <span class="var">v49</span> <span class="true">[TRUE]</span> <span class="dim">[GIVEN]</span>
+<span class="kw">[TRC]</span> 2 <span class="var">v103</span> <span class="true">[TRUE]</span> <span class="dim">[YIELDS]</span>
+<span class="kw">[TRC]</span> 3 <span class="var">v173</span> <span class="true">[TRUE]</span> <span class="dim">[YIELDS]</span>
+<span class="kw">[TRC]</span> 4 <span class="var">v75</span> <span class="true">[TRUE]</span> <span class="dim">[YIELDS]</span>
+<span class="kw">[TRC]</span> 5 <span class="var">v97</span> <span class="true">[TRUE]</span> <span class="dim">[YIELDS]</span>
+<span class="kw">[TRC]</span> 6 <span class="var">v107</span> <span class="true">[TRUE]</span> <span class="dim">[YIELDS]</span>
+
+<span class="answer">Answer: v107 [TRUE]</span>
+                </div>
+                <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: 1rem;">The model floods activation from v49 through the graph, reaching v107 via two independent paths (v49→v103→v75→v107 and v49→v173→v97→v107).</p>
+            </div>
+        </section>
+
+        <!-- Failing types -->
+        <section class="section">
+            <h2 class="section-title">The open challenge: 0% exact match</h2>
+            <p class="section-desc">These types have high partial scores (F1 0.63–0.95) — the model gets the format right but makes reasoning errors on the hardest chains. Solving these is the current research frontier.</p>
+
+            <!-- Labyrinth -->
+            <div class="card">
+                <span class="card-tag tag-fail">0% EM · F1 0.72</span>
+                <h3>Labyrinth Navigation</h3>
+                <p>Long-range path finding through a maze of conditional rules. Requires tracking 10–30 hops through a noisy graph where most paths are dead ends. The model must find the single valid derivation chain among dozens of distractors.</p>
+                <div class="trace">
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v61</span> <span class="true">[TRUE]</span> <span class="kw">[AND]</span> <span class="var">v184</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="var">v104</span> <span class="true">[TRUE]</span>
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v104</span> <span class="true">[TRUE]</span> <span class="kw">[AND]</span> <span class="var">v176</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="var">v132</span> <span class="true">[TRUE]</span>
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v132</span> <span class="true">[TRUE]</span> <span class="kw">[AND]</span> <span class="var">v48</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="var">v21</span> <span class="true">[TRUE]</span>
+<span class="dim">... 18 more rules (noise + signal mixed)</span>
+<span class="kw">[GIVEN]</span> <span class="var">v61</span> <span class="true">[TRUE]</span>, <span class="var">v184</span> <span class="true">[TRUE]</span>, <span class="var">v48</span> <span class="true">[TRUE]</span>, <span class="var">v176</span> <span class="true">[TRUE]</span>
+<span class="kw">[QUERY]</span> <span class="var">v177</span>
+
+<span class="dim">── Required trace (14 hops) ──</span>
+<span class="kw">[TRC]</span> 1 <span class="var">v61</span> + <span class="var">v184</span> → <span class="var">v104</span> <span class="dim">[YIELDS]</span>
+<span class="kw">[TRC]</span> 2 <span class="var">v104</span> + <span class="var">v176</span> → <span class="var">v132</span> <span class="dim">[YIELDS]</span>
+<span class="kw">[TRC]</span> 3 <span class="var">v132</span> + <span class="var">v48</span> → <span class="var">v21</span> <span class="dim">[YIELDS]</span>
+<span class="dim">... 8 more hops ...</span>
+<span class="kw">[TRC]</span> 12 <span class="var">v121</span> + <span class="var">v48</span> → <span class="var">v103</span> <span class="dim">[YIELDS]</span>
+<span class="kw">[TRC]</span> 13 <span class="var">v103</span> + <span class="var">v184</span> → <span class="var">v177</span> <span class="dim">[YIELDS]</span>
+
+<span class="answer">Answer: v177 [TRUE]</span>
+                </div>
+                <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: 1rem;">Why it fails: 14 sequential hops with alternating key variables (v184, v176, v48). One wrong step compounds — 95% per-token accuracy still yields 0% exact match on 150-token states.</p>
+            </div>
+
+            <!-- ECA -->
+            <div class="card">
+                <span class="card-tag tag-fail">0% EM · F1 0.68</span>
+                <h3>Elementary Cellular Automata (ECA)</h3>
+                <p>Simulate cellular automaton rules over multiple timesteps. Each cell's next state depends on its neighborhood (left, center, right). Requires parallel state tracking across all cells simultaneously.</p>
+                <div class="trace">
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="false">[FALSE]</span> <span class="false">[FALSE]</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="kw">[BECOMES]</span> <span class="true">[TRUE]</span>
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="true">[TRUE]</span> <span class="false">[FALSE]</span> <span class="false">[FALSE]</span> <span class="kw">[THEN]</span> <span class="kw">[BECOMES]</span> <span class="true">[TRUE]</span>
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="true">[TRUE]</span> <span class="true">[TRUE]</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="kw">[BECOMES]</span> <span class="true">[TRUE]</span>
+<span class="dim">... 5 more neighborhood rules</span>
+<span class="kw">[GIVEN]</span> <span class="var">v33</span> <span class="true">[TRUE]</span>, <span class="var">v93</span> <span class="true">[TRUE]</span>, <span class="var">v135</span> <span class="true">[TRUE]</span>, <span class="var">v128</span> <span class="true">[TRUE]</span>, <span class="var">v138</span> <span class="false">[FALSE]</span>, <span class="var">v69</span> <span class="false">[FALSE]</span>
+<span class="kw">[QUERY]</span> state after 2 timesteps
+
+<span class="dim">── Required: simulate 6 cells × 2 steps ──</span>
+<span class="dim">Step 0: [T, F, T, T, T, F]</span>
+<span class="dim">Step 1: apply rules to each neighborhood...</span>
+<span class="dim">Step 2: apply rules again...</span>
+
+<span class="answer">Answer: final cell states after 2 iterations</span>
+                </div>
+                <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: 1rem;">Why it fails: ECA requires parallel computation — all cells update simultaneously based on their neighbors. Chain-of-thought serializes this, forcing the model to track multiple cells' states in working memory. The "CoT Tax" — sequential reasoning hurts parallel operations.</p>
+            </div>
+
+            <!-- Planning with Preconditions -->
+            <div class="card">
+                <span class="card-tag tag-fail">0% EM · F1 0.87</span>
+                <h3>Planning with Preconditions</h3>
+                <p>Find a valid action sequence where each action has preconditions that must be satisfied before execution. Requires forward search through a state space with dependencies between actions.</p>
+                <div class="trace">
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v113</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="var">v194</span> <span class="true">[TRUE]</span>
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v113</span> <span class="true">[TRUE]</span> <span class="kw">[AND]</span> <span class="var">v194</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="var">v13</span> <span class="true">[TRUE]</span>
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v13</span> <span class="true">[TRUE]</span> <span class="kw">[AND]</span> <span class="var">v113</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="var">v33</span> <span class="true">[TRUE]</span>
+<span class="kw">[RULE]</span> <span class="kw">[IF]</span> <span class="var">v113</span> <span class="true">[TRUE]</span> <span class="kw">[AND]</span> <span class="var">v194</span> <span class="true">[TRUE]</span> <span class="kw">[THEN]</span> <span class="var">v140</span> <span class="true">[TRUE]</span>
+<span class="kw">[GIVEN]</span> <span class="var">v73</span> <span class="true">[TRUE]</span>, <span class="var">v194</span> <span class="true">[TRUE]</span>, <span class="var">v52</span> <span class="false">[FALSE]</span>
+<span class="kw">[QUERY]</span> <span class="var">v13</span>
+
+<span class="dim">── The trap ──</span>
+<span class="dim">v13 requires v113 AND v194.</span>
+<span class="dim">v194 is given as TRUE. But v113 is NOT given.</span>
+<span class="dim">No rule produces v113. Therefore v13 cannot be derived.</span>
+
+<span class="answer">Answer: v13 [FALSE]</span>
+                </div>
+                <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: 1rem;">Why it fails: high F1 (0.87) means the model almost gets it right. It correctly identifies the relevant rules and variables but makes errors on precondition checking — it sometimes "assumes" a precondition is met when it isn't explicitly given.</p>
+            </div>
+        </section>
+
+        <!-- All types overview -->
+        <section class="section">
+            <h2 class="section-title">All 30 reasoning types</h2>
+            <p class="section-desc">The full taxonomy of reasoning capabilities tested. Each type has easy, medium, and hard variants with increasing hop counts, variable counts, and red herrings.</p>
+
+            <div class="type-grid">
+                <div class="type-item"><span class="type-name">backward_chain</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">mixed_direction</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">causal_chain</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">spatial_flood</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">spatial_barrier</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">spatial_multi_source</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">counterfactual_simple</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">counterfactual_cascade</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">counterfactual_minimal</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">disjunctive_simple</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">disjunctive_elimination</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">disjunctive_minimal</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">void_simple</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">void_partial_chain</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">void_ambiguous</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">abductive_simple</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">abductive_multi_hyp</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">abductive_chained</span><span class="type-status status-pass">100%</span></div>
+                <div class="type-item"><span class="type-name">labyrinth</span><span class="type-status status-fail">0%</span></div>
+                <div class="type-item"><span class="type-name">threshold</span><span class="type-status status-fail">0%</span></div>
+                <div class="type-item"><span class="type-name">transitive_simple</span><span class="type-status status-fail">0%</span></div>
+                <div class="type-item"><span class="type-name">transitive_multi_rel</span><span class="type-status status-fail">0%</span></div>
+                <div class="type-item"><span class="type-name">eca_simple</span><span class="type-status status-fail">0%</span></div>
+                <div class="type-item"><span class="type-name">eca_multi_rule</span><span class="type-status status-fail">0%</span></div>
+                <div class="type-item"><span class="type-name">planning_simple</span><span class="type-status status-fail">0%</span></div>
+                <div class="type-item"><span class="type-name">planning_precon</span><span class="type-status status-fail">0%</span></div>
+                <div class="type-item"><span class="type-name">naf_simple</span><span class="type-status status-fail">0%</span></div>
+                <div class="type-item"><span class="type-name">defeasible</span><span class="type-status status-fail">0%</span></div>
+                <div class="type-item"><span class="type-name">induction_cycle</span><span class="type-status status-fail">0%</span></div>
+                <div class="type-item"><span class="type-name">exclusion_mutual</span><span class="type-status status-fail">0%</span></div>
+            </div>
+        </section>
+
+        <!-- Real-world scenarios -->
+        <section class="section">
+            <h2 class="section-title">Real-world applications</h2>
+            <p class="section-desc">The same reasoning structures appear everywhere. The model learns abstract logic — the domain is just a mapping layer on top.</p>
+
+            <div class="scenario-grid">
+                <div class="scenario">
+                    <h4>Medical Diagnosis</h4>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">Backward chaining + abductive reasoning: given symptoms, work backwards through diagnostic rules to find the most likely cause.</p>
+                    <div class="mapping">
+                        <span>v0</span> → fever<br>
+                        <span>v1</span> → rash<br>
+                        <span>v2</span> → cough<br>
+                        <span>v3</span> → measles<br>
+                        <span>v4</span> → flu<br>
+                        Rule: IF v0 [TRUE] AND v1 [TRUE] AND v2 [FALSE] → v3 [TRUE]
+                    </div>
+                </div>
+
+                <div class="scenario">
+                    <h4>Supply Chain Logic</h4>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">Causal chains + planning: determine if an order can ship by tracing dependencies through the fulfillment pipeline.</p>
+                    <div class="mapping">
+                        <span>v0</span> → order_packed<br>
+                        <span>v1</span> → carrier_confirmed<br>
+                        <span>v2</span> → pickup_scheduled<br>
+                        <span>v3</span> → can_ship<br>
+                        Rule: IF v0 [TRUE] AND v1 [TRUE] AND v2 [TRUE] → v3 [TRUE]
+                    </div>
+                </div>
+
+                <div class="scenario">
+                    <h4>Network Security</h4>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">Spatial flood + barrier: model attack propagation through a network. Which nodes are reachable from a compromised host, given firewall rules?</p>
+                    <div class="mapping">
+                        <span>v0</span> → compromised_host<br>
+                        <span>v1</span> → firewall_active<br>
+                        <span>v2</span> → database_server<br>
+                        <span>v3</span> → user_data<br>
+                        Rule: IF v0 [ACTIVE] AND [ADJACENT] AND NOT v1 → v2 [TRUE]
+                    </div>
+                </div>
+
+                <div class="scenario">
+                    <h4>Legal Reasoning</h4>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">Defeasible logic + priority: general rules can be overridden by more specific exceptions. Higher-priority rules defeat lower ones.</p>
+                    <div class="mapping">
+                        <span>v0</span> → contract_valid<br>
+                        <span>v1</span> → force_majeure<br>
+                        <span>v2</span> → obligation_holds<br>
+                        Rule: IF v0 [TRUE] → v2 [TRUE]<br>
+                        Exception: IF v1 [TRUE] → v2 [FALSE] (priority: high)
+                    </div>
+                </div>
+
+                <div class="scenario">
+                    <h4>Crime Investigation</h4>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">Counterfactual reasoning: if the suspect wasn't at the scene, would the evidence still hold? Test hypotheses by negating assumptions.</p>
+                    <div class="mapping">
+                        <span>v0</span> → suspect_at_scene<br>
+                        <span>v1</span> → dna_match<br>
+                        <span>v2</span> → motive_established<br>
+                        <span>v3</span> → prime_suspect<br>
+                        Counterfactual: IF NOT v0 → does v3 still hold?
+                    </div>
+                </div>
+
+                <div class="scenario">
+                    <h4>Configuration Management</h4>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">Mutual exclusion + constraint satisfaction: certain options are incompatible. Find a valid configuration that satisfies all constraints.</p>
+                    <div class="mapping">
+                        <span>v0</span> → gpu_mode<br>
+                        <span>v1</span> → low_power_mode<br>
+                        <span>v2</span> → high_res_display<br>
+                        Constraint: NOT (v0 AND v1)<br>
+                        Constraint: IF v2 → v0
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Research context -->
+        <section class="section">
+            <h2 class="section-title">Research context</h2>
+            <p class="section-desc">This is an ongoing research project exploring the limits of transformer reasoning.</p>
+
+            <div class="card">
+                <h3>The core question</h3>
+                <p>Can a transformer learn systematic multi-hop reasoning if you eliminate all confounds from natural language? WRE isolates this question by removing memorization, world knowledge, and linguistic shortcuts. What remains is pure logical structure.</p>
             </div>
             <div class="card">
-                <div class="card-icon">⚡</div>
-                <h3>Lightweight by design</h3>
-                <p>General-purpose LLMs need hundreds of billions of parameters to store world knowledge AND reason. Our engine strips away everything except logic. A 1.88B parameter model focused purely on reasoning. No memorized facts, no language overhead. Just logic.</p>
+                <h3>Key findings so far</h3>
+                <p style="margin-bottom: 0.8rem;">• <strong>18/30 types solved perfectly</strong> — the model genuinely learns multi-step reasoning for these categories</p>
+                <p style="margin-bottom: 0.8rem;">• <strong>The CoT Tax</strong> — chain-of-thought reasoning hurts parallel operations (ECA, temporal_sync). Forcing serialization of inherently parallel computations degrades performance</p>
+                <p style="margin-bottom: 0.8rem;">• <strong>RL can't teach new capabilities</strong> — extensive GRPO experiments (v1–v8, 6 curriculum configs) confirmed that if the model can't find correct solutions during sampling, the gradient is zero regardless of reward shaping</p>
+                <p>• <strong>Format ≠ reasoning</strong> — the 12 failing types have high F1 (0.63–0.95), meaning the model produces correctly formatted outputs but makes logical errors. The generation circuit works; the reasoning circuit doesn't</p>
             </div>
-        </div>
-    </section>
-
-
-    <section id="poc" class="fade-in">
-        <div class="section-label">Proof of Concept</div>
-        <div class="section-title">V1 results</div>
-        <div class="section-desc">These are selected examples from our V1 proof-of-concept model. The model is not perfect, it makes mistakes. But when it works, it demonstrates genuine multi-step reasoning that no amount of pattern matching can replicate.</div>
-
-        <div class="poc-tabs" role="tablist">
-            <button class="poc-tab active" role="tab" aria-selected="true" data-tab="forward">Forward Chaining</button>
-            <button class="poc-tab" role="tab" aria-selected="false" data-tab="void">Knows When It Cannot Answer</button>
-            <button class="poc-tab" role="tab" aria-selected="false" data-tab="abductive">Backtracking</button>
-        </div>
-
-        <!-- Tab 1: Forward chaining -->
-        <div class="poc-panel active" id="poc-forward" role="tabpanel">
-            <div class="poc-trace">
-<span class="kw">[TRC]</span> 1 <span class="ent">Celkgrermik</span> <span class="tr">[TRUE]</span> <span class="kw">[AND]</span> <span class="ent">Rauskik</span> <span class="tr">[TRUE]</span> → <span class="ent">Krairbdrefik</span> <span class="tr">[TRUE]</span>
-<span class="kw">[TRC]</span> 2 <span class="ent">Krairbdrefik</span> <span class="tr">[TRUE]</span> <span class="kw">[AND]</span> <span class="ent">Fauthshadous</span> <span class="tr">[TRUE]</span> → <span class="ent">Vraurpux</span> <span class="tr">[TRUE]</span>
-<span class="kw">[TRC]</span> 3 <span class="ent">Vraurpux</span> <span class="tr">[TRUE]</span> <span class="kw">[AND]</span> <span class="ent">Rauskik</span> <span class="tr">[TRUE]</span> → <span class="ent">Vrabfloirdus</span> <span class="tr">[TRUE]</span>
-<span class="kw">[TRC]</span> 4 <span class="ent">Vrabfloirdus</span> <span class="tr">[TRUE]</span> <span class="kw">[AND]</span> <span class="ent">Fauthshadous</span> <span class="tr">[TRUE]</span> → <span class="ent">Zertox</span> <span class="tr">[TRUE]</span>
-<span class="kw">[TRC]</span> 5 <span class="ent">Zertox</span> <span class="tr">[TRUE]</span> <span class="kw">[AND]</span> <span class="ent">Rauskik</span> <span class="tr">[TRUE]</span> → <span class="ent">Spipem</span> <span class="tr">[TRUE]</span>
-<span class="hi">Answer: Spipem [TRUE] ✓</span>
+            <div class="card">
+                <h3>Technical stack</h3>
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 2; color: var(--text-dim);">
+                    Framework: JAX/Flax<br>
+                    Compute: Google TPU Research Cloud (v6e-8)<br>
+                    Architecture: 1.74B params, AttnRes, 32 layers / 8 blocks<br>
+                    Tokenizer: Word-level, vocab ~320 tokens<br>
+                    Data: 28.4M traces, formally verified<br>
+                    Training: 203K steps pre-train + 6K steps SFT + GRPO v1–v8
+                </p>
             </div>
-            <div class="poc-explain">
-                <div>
-                    <h4>56 rules. 6 hops. One correct answer.</h4>
-                    <p>Given 56 interconnected rules, the engine found the exact 6-step derivation chain to prove the query.</p>
-                </div>
-                <div class="poc-result true">Spipem [TRUE] ✓</div>
-                <div class="poc-highlight">
-                    <strong>No shortcuts. No hallucination.</strong> Every intermediate fact was derived before being used.
-                </div>
-            </div>
-        </div>
+        </section>
+    </div>
 
-        <!-- Tab 2: Insufficient information -->
-        <div class="poc-panel" id="poc-void" role="tabpanel">
-            <div class="poc-trace">
-<span class="kw">[TRC]</span> 1 <span class="ent">Zroirbon</span> <span class="tr">[TRUE]</span> <span class="kw">[AND]</span> <span class="ent">Glerbul</span> <span class="tr">[TRUE]</span> → <span class="ent">Gralmel</span> <span class="tr">[TRUE]</span>
-<span class="kw">[TRC]</span> 2 <span class="ent">Gralmel</span> <span class="tr">[TRUE]</span> needs <span class="ent">Kairbul</span> <span class="tr">[TRUE]</span>
-<span class="kw">[TRC]</span> 3 SCAN: <span class="ent">Kairbul</span> → <span class="fa">NOT FOUND</span>
-<span class="fa">[TRC]</span> 4 <span class="fa">HALT: Insufficient information</span>
-<span class="hi">Answer: [INSUFFICIENT]. No hallucination.</span>
-            </div>
-            <div class="poc-explain">
-                <div>
-                    <h4>Missing information? It says so.</h4>
-                    <p>When a required fact is missing, the engine halts and reports insufficient data instead of guessing.</p>
-                </div>
-                <div class="poc-result insuf">[INSUFFICIENT]</div>
-                <div class="poc-highlight">
-                    <strong>The model knows when it doesn't have enough information.</strong> No hallucination, no confident wrong answer. Just an honest halt.
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab 3: Backtracking -->
-        <div class="poc-panel" id="poc-abductive" role="tabpanel">
-            <div class="poc-trace">
-<span class="kw">[TRC]</span> 1 ASSUME: <span class="ent">Scouxest</span> <span class="tr">[TRUE]</span>
-<span class="kw">[TRC]</span> 2 <span class="ent">Skilmskaskik</span> needed but <span class="fa">[FALSE]</span> → <span class="fa">CONTRADICTION</span>
-<span class="fa">[TRC]</span> 3 <span class="fa">BACKTRACK, flush assumption 1</span>
-<span class="kw">[TRC]</span> 4 ASSUME: <span class="ent">Scouxest</span>, <span class="ent">Daurseix</span> <span class="tr">[TRUE]</span>
-<span class="kw">[TRC]</span> 5 <span class="ent">Skilmskaskik</span> still <span class="fa">[FALSE]</span> → <span class="fa">CONTRADICTION</span>
-<span class="fa">[TRC]</span> 6 <span class="fa">BACKTRACK, flush assumption 2</span>
-<span class="kw">[TRC]</span> 7 ASSUME: <span class="ent">Scouxest</span>, <span class="ent">Skilmskaskik</span>, <span class="ent">Daurseix</span> <span class="tr">[TRUE]</span>
-<span class="kw">[TRC]</span> 8 Full chain verified: <span class="ent">Spirsol</span> → <span class="ent">Salpmurmux</span> → <span class="ent">Haitshoinus</span> → <span class="ent">Vrolknushon</span> → <span class="ent">Jirgux</span> <span class="tr">✓</span>
-<span class="hi">Answer: Scouxest, Skilmskaskik, Daurseix [TRUE]</span>
-            </div>
-            <div class="poc-explain">
-                <div>
-                    <h4>Wrong assumption? It backtracks.</h4>
-                    <p>The engine forms hypotheses, tests them, detects contradictions, and tries again. Like a mathematician.</p>
-                </div>
-                <div class="poc-result true">Scouxest, Skilmskaskik, Daurseix [TRUE]</div>
-                <div class="poc-highlight">
-                    <strong>After 3 attempts it found the correct combination of assumptions</strong> that satisfies all constraints. No guessing, just systematic search.
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="technology" class="fade-in">
-        <div class="section-label">Why It Works</div>
-        <div class="section-title">Trained to reason, not to remember</div>
-
-        <div class="code-section">
-            <div>
-                <p style="color: var(--text-dim); line-height: 1.8; margin-bottom: 1.5rem;">The White Room Engine was trained entirely on an invented alien vocabulary, symbols with no connection to any human language. The model had no choice but to learn the abstract logical structure of problems, because there was nothing to memorize.</p>
-                <p style="color: var(--text-dim); line-height: 1.8; margin-bottom: 1.5rem;">Every training example was generated and verified by formal solvers, the same class of software used to prove mathematical theorems. Zero label errors. Zero ambiguity. The model learned what correct reasoning actually looks like.</p>
-                <p style="color: var(--text-dim); line-height: 1.8;">The result is a reasoning core that transfers cleanly to real-world domains. When you feed it your rules and facts, it applies the same rigorous inference. Not pattern-matching dressed up as logic.</p>
-            </div>
-            <div>
-                <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.5rem; font-family: 'JetBrains Mono', monospace;">// What happens under the hood</div>
-                <div class="code-block">
-                    <span class="comment">// Reasoning trace (alien training vocabulary)</span><br><br>
-                    <span class="keyword">[RULE]</span> <span class="keyword">[IF]</span> <span class="entity">Vraurpux</span> <span class="token">[TRUE]</span> <span class="keyword">[AND]</span> <span class="entity">Rauskik</span> <span class="token">[TRUE]</span><br>
-                    &nbsp;&nbsp;<span class="keyword">[THEN]</span> <span class="entity">Vrabfloirdus</span> <span class="token">[TRUE]</span><br><br>
-                    <span class="keyword">[RULE]</span> <span class="keyword">[IF]</span> <span class="entity">Vrabfloirdus</span> <span class="token">[TRUE]</span> <span class="keyword">[AND]</span> <span class="entity">Fauthshadous</span> <span class="token">[TRUE]</span><br>
-                    &nbsp;&nbsp;<span class="keyword">[THEN]</span> <span class="entity">Zertox</span> <span class="token">[TRUE]</span><br><br>
-                    <span class="keyword">[RULE]</span> <span class="keyword">[IF]</span> <span class="entity">Zertox</span> <span class="token">[TRUE]</span> <span class="keyword">[AND]</span> <span class="entity">Rauskik</span> <span class="token">[TRUE]</span><br>
-                    &nbsp;&nbsp;<span class="keyword">[THEN]</span> <span class="entity">Spipem</span> <span class="token">[TRUE]</span><br><br>
-                    <span class="keyword">[GIVEN]</span> <span class="entity">Vraurpux</span> <span class="token">[TRUE]</span> <span class="entity">Rauskik</span> <span class="token">[TRUE]</span><br>
-                    &nbsp;&nbsp;<span class="entity">Fauthshadous</span> <span class="token">[TRUE]</span><br><br>
-                    <span class="keyword">[STATE]</span> <span class="entity">Vraurpux</span> <span class="token">[TRUE]</span> <span class="entity">Rauskik</span> <span class="token">[TRUE]</span><br>
-                    &nbsp;&nbsp;<span class="entity">Fauthshadous</span> <span class="token">[TRUE]</span> <span class="entity">Vrabfloirdus</span> <span class="token">[TRUE]</span><br>
-                    &nbsp;&nbsp;<span class="entity">Zertox</span> <span class="token">[TRUE]</span> <span class="entity">Spipem</span> <span class="token">[TRUE]</span><br><br>
-                    <span class="comment">// Every step derived — nothing recalled</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class='fade-in' style='text-align:center;padding:4rem 2rem 2rem;'>
-  <p style='font-size:1.15rem;color:var(--text-dim);max-width:650px;margin:0 auto;line-height:1.8;'>From legal compliance to medical diagnosis to game AI. Any domain where logic matters, Xenologic can reason through it.</p>
-</section>
-
-    <section id="research" class="research-section fade-in">
-        <div class="research-status">
-            <span class="dot" style="background:var(--accent);animation:pulse 2s infinite;width:6px;height:6px;border-radius:50%;display:inline-block;"></span>
-            Active development
-        </div>
-        <div class="section-title">Research in Progress</div>
-        <div class="section-desc" style="margin: 1rem auto 2rem;">Xenologic is in active development. Follow our research.</div>
-        <a href="mailto:hamza.zaraoui@xenologic.dev" class="btn btn-secondary">Contact me →</a>
-    </section>
-
+    <!-- Footer -->
     <footer>
-        <p>© 2026 Xenologic · Amsterdam, Netherlands</p>
+        <div class="container">
+            <p style="margin-bottom: 1rem;">White Room Engine V3 — Hamza Zaraoui</p>
+            <p><a href="https://github.com/Hamzatjo/white-room-engine-v2">GitHub</a> · <a href="https://www.linkedin.com/in/hamza-zaraoui-34466b1b5/">LinkedIn</a> · <a href="mailto:hamza.zaraoui@xenologic.dev">hamza.zaraoui@xenologic.dev</a></p>
+        </div>
     </footer>
-
-    <script>
-        // Hamburger menu toggle
-        const hamburger = document.getElementById('hamburger');
-        const navLinks = document.getElementById('nav-links');
-
-        hamburger.addEventListener('click', () => {
-            const open = navLinks.classList.toggle('open');
-            hamburger.classList.toggle('open', open);
-            hamburger.setAttribute('aria-expanded', open);
-        });
-
-        // Close menu when a nav link is clicked
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.classList.remove('open');
-                hamburger.classList.remove('open');
-                hamburger.setAttribute('aria-expanded', 'false');
-            });
-        });
-
-        // Intersection Observer for fade-in animations
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-        // Smooth nav background on scroll
-        const nav = document.querySelector('nav');
-        window.addEventListener('scroll', () => {
-            nav.style.borderBottomColor = window.scrollY > 50 ? 'var(--border)' : 'transparent';
-        });
-
-        // ─── Alien decode effect ───
-        const ALIEN_GLYPHS = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛝᛟ';
-        const TARGET_TEXT = 'Logic you can trust';
-        const GRADIENT_WORD = 'trust';
-
-        function randomGlyph() {
-            return ALIEN_GLYPHS[Math.floor(Math.random() * ALIEN_GLYPHS.length)];
-        }
-
-        function buildHTML(decoded, total) {
-            // Rebuild the h1 inner HTML with gradient span intact
-            // TARGET_TEXT uses \n for the <br>
-            let html = '';
-            let i = 0;
-            const chars = TARGET_TEXT.split('');
-            // Track position in gradient word
-            const gradientStart = TARGET_TEXT.indexOf(GRADIENT_WORD);
-            const gradientEnd = gradientStart + GRADIENT_WORD.length;
-
-            for (let ci = 0; ci < chars.length; ci++) {
-                const ch = chars[ci];
-                if (ch === '\n') {
-                    html += '<br>';
-                    continue;
-                }
-                const isDecoded = ci < decoded;
-                const inGradient = ci >= gradientStart && ci < gradientEnd;
-                const displayChar = isDecoded ? ch : (ci < total ? randomGlyph() : ch);
-
-                if (inGradient) {
-                    if (isDecoded) {
-                        html += `<span class="gradient">${ch}</span>`;
-                    } else {
-                        // scrambled gradient chars — show glyph with gradient style
-                        html += `<span class="gradient">${randomGlyph()}</span>`;
-                    }
-                } else {
-                    html += displayChar;
-                }
-            }
-            return html;
-        }
-
-        function runDecodeEffect() {
-            const h1 = document.getElementById('hero-title');
-            const chars = TARGET_TEXT.split('').filter(c => c !== '\n');
-            const total = chars.length;
-            const DURATION = 1800; // ms
-            const SCRAMBLE_CYCLES = 6; // how many random frames per char before locking
-            const charDelay = DURATION / total;
-
-            let decodedCount = 0;
-            let startTime = null;
-            let scrambleFrame = 0;
-
-            function frame(ts) {
-                if (!startTime) startTime = ts;
-                const elapsed = ts - startTime;
-
-                // How many chars should be decoded by now
-                const targetDecoded = Math.min(total, Math.floor(elapsed / charDelay));
-
-                // Advance decoded count
-                if (targetDecoded > decodedCount) {
-                    decodedCount = targetDecoded;
-                }
-
-                h1.innerHTML = buildHTML(decodedCount, total);
-
-                if (decodedCount < total) {
-                    requestAnimationFrame(frame);
-                } else {
-                    // Final state — clean render with gradient
-                    h1.innerHTML = 'Logic you can <span class="gradient">trust</span>';
-                }
-            }
-
-            requestAnimationFrame(frame);
-        }
-
-        // ─── Floating alien particles ───
-        const PARTICLE_CHARS = ['Ξ', 'Λ', 'Ψ', 'Ω', 'Σ', 'Δ', '∇', '⟁', '◊', '⬡', 'Φ', 'Θ', 'Π', 'ᛟ', 'ᚠ', 'ᛗ', '⌬', '⎔'];
-        const container = document.getElementById('alien-particles');
-        const COUNT = 18;
-
-        for (let i = 0; i < COUNT; i++) {
-            const el = document.createElement('span');
-            el.className = 'alien-particle';
-            el.textContent = PARTICLE_CHARS[Math.floor(Math.random() * PARTICLE_CHARS.length)];
-
-            // Random start position
-            const x = Math.random() * 100;
-            const y = Math.random() * 100;
-            el.style.left = x + '%';
-            el.style.top = y + '%';
-
-            // Random drift direction and distance
-            const angle = Math.random() * Math.PI * 2;
-            const dist = 60 + Math.random() * 120;
-            const dx = Math.cos(angle) * dist;
-            const dy = Math.sin(angle) * dist;
-            const dr = (Math.random() - 0.5) * 180;
-            el.style.setProperty('--dx', dx + 'px');
-            el.style.setProperty('--dy', dy + 'px');
-            el.style.setProperty('--dr', dr + 'deg');
-
-            // Random duration and delay so they're all out of sync
-            const duration = 8 + Math.random() * 14;
-            const delay = -(Math.random() * duration); // negative = already mid-animation
-            el.style.animationDuration = duration + 's';
-            el.style.animationDelay = delay + 's';
-
-            // Slight size variation
-            el.style.fontSize = (0.75 + Math.random() * 0.75) + 'rem';
-
-            container.appendChild(el);
-        }
-
-        // ─── PoC tab switching ───
-        document.querySelectorAll('.poc-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                const target = tab.dataset.tab;
-                document.querySelectorAll('.poc-tab').forEach(t => {
-                    t.classList.remove('active');
-                    t.setAttribute('aria-selected', 'false');
-                });
-                document.querySelectorAll('.poc-panel').forEach(p => p.classList.remove('active'));
-                tab.classList.add('active');
-                tab.setAttribute('aria-selected', 'true');
-                document.getElementById('poc-' + target).classList.add('active');
-            });
-        });
-
-        // ─── Hero terminal typewriter ───
-        (function () {
-          const body = document.getElementById('term-body');
-          if (!body) return;
-
-          const ALIEN_GLYPHS = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛝᛟ';
-          function rg() { return ALIEN_GLYPHS[Math.floor(Math.random() * ALIEN_GLYPHS.length)]; }
-
-          function setAnnotation(id) {
-            document.querySelectorAll('.hero-annotation').forEach(el => el.classList.remove('active'));
-            const el = document.getElementById(id);
-            if (el) el.classList.add('active');
-            const phaseMap = { 'ann-input': 'input', 'ann-compile': 'compile', 'ann-trc': 'trace', 'ann-answer': 'answer' };
-            if (phaseMap[id]) window._termCurrentPhase = phaseMap[id];
-          }
-
-          function typeInto(el, text, msPerChar) {
-            return new Promise(resolve => {
-              let i = 0;
-              function next() {
-                if (window._termPaused) { setTimeout(next, 100); return; }
-                if (i >= text.length) { resolve(); return; }
-                el.textContent += text[i++];
-                setTimeout(next, msPerChar);
-              }
-              next();
-            });
-          }
-
-          function scrambleDecode(el, targetHTML, duration, cb) {
-            const tmp = document.createElement('div');
-            tmp.innerHTML = targetHTML;
-            const plain = tmp.textContent;
-            const total = plain.length;
-            let elapsed = 0;
-            let lastTs = null;
-            function frame(now) {
-              if (window._termPaused) { lastTs = null; requestAnimationFrame(frame); return; }
-              if (lastTs !== null) elapsed += now - lastTs;
-              lastTs = now;
-              const progress = Math.min(elapsed / duration, 1);
-              const decoded = Math.floor(progress * total);
-              let pi = 0;
-              const result = targetHTML.replace(/[^<>]+/g, (match) => {
-                let out = '';
-                for (let ci = 0; ci < match.length; ci++) {
-                  out += (pi < decoded) ? match[ci] : (match[ci] === ' ' ? ' ' : rg());
-                  pi++;
-                }
-                return out;
-              });
-              el.innerHTML = result;
-              if (progress < 1) {
-                requestAnimationFrame(frame);
-              } else {
-                el.innerHTML = targetHTML;
-                if (cb) cb();
-              }
-            }
-            requestAnimationFrame(frame);
-          }
-
-          function appendLine(html) {
-            const div = document.createElement('div');
-            div.innerHTML = html;
-            body.appendChild(div);
-            return div;
-          }
-
-          function sleep(ms, isAlive) {
-            return new Promise(r => {
-              const start = performance.now();
-              function check() {
-                if (isAlive && !isAlive()) { r(); return; }
-                if (window._termPaused) { setTimeout(check, 100); return; }
-                const remaining = ms - (performance.now() - start);
-                if (remaining <= 0) { r(); } else { setTimeout(r, remaining); }
-              }
-              setTimeout(check, ms);
-            });
-          }
-
-          // ── Example configs ──
-          const EXAMPLES = [
-            {
-              label: 'Example 1',
-              facts: [
-                'The suspect was at the crime scene.',
-                'He had a motive.',
-                'His alibi turned out to be false.',
-              ],
-              question: 'Is he the prime suspect?',
-              policyTitle: 'Internal Investigation Policy:',
-              policyLines: [
-                'A person becomes a person of interest if they were present at the scene and had a motive.',
-                'A person of interest becomes the prime suspect if their alibi is proven false.',
-              ],
-              alienLines: [
-                '<span class="t-kw">[RULE]</span> <span class="t-kw">[IF]</span> <span class="t-ent">Taukltik</span> <span class="t-true">[TRUE]</span> <span class="t-kw">[AND]</span> <span class="t-ent">Skackul</span> <span class="t-true">[TRUE]</span> <span class="t-kw">[THEN]</span> <span class="t-ent">Grazik</span> <span class="t-true">[TRUE]</span>',
-                '<span class="t-kw">[RULE]</span> <span class="t-kw">[IF]</span> <span class="t-ent">Grazik</span> <span class="t-true">[TRUE]</span> <span class="t-kw">[AND]</span> <span class="t-ent">Zreikntsul</span> <span class="t-true">[TRUE]</span> <span class="t-kw">[THEN]</span> <span class="t-ent">Lopan</span> <span class="t-true">[TRUE]</span>',
-                '<span class="t-kw">[GIVEN]</span> <span class="t-ent">Taukltik</span> <span class="t-true">[TRUE]</span> <span class="t-ent">Skackul</span> <span class="t-true">[TRUE]</span> <span class="t-ent">Zreikntsul</span> <span class="t-true">[TRUE]</span>',
-                '<span class="t-kw">[QUERY]</span> <span class="t-ent">Lopan</span>',
-              ],
-              traceLines: [
-                '<span class="t-kw">[TRC]</span> 1 <span class="t-ent">Taukltik</span> <span class="t-true">[TRUE]</span> <span class="t-kw">[AND]</span> <span class="t-ent">Skackul</span> <span class="t-true">[TRUE]</span> → <span class="t-ent">Grazik</span> <span class="t-true">[TRUE]</span>',
-                '<span class="t-kw">[TRC]</span> 2 <span class="t-ent">Grazik</span> <span class="t-true">[TRUE]</span> <span class="t-kw">[AND]</span> <span class="t-ent">Zreikntsul</span> <span class="t-true">[TRUE]</span> → <span class="t-ent">Lopan</span> <span class="t-true">[TRUE]</span>',
-                '<span class="t-kw">[STATE]</span> <span class="t-ent">Lopan</span> <span class="t-true">[TRUE]</span> ✓',
-              ],
-              answerHTML: '<span class="t-answer">Answer: Yes. He is the prime suspect.</span>',
-              reverseMappings: [
-                { alien: 'Taukltik',   english: 'suspect at scene' },
-                { alien: 'Skackul',    english: 'had motive' },
-                { alien: 'Grazik',     english: 'person of interest' },
-                { alien: 'Zreikntsul', english: 'alibi is false' },
-                { alien: 'Lopan',      english: 'prime suspect' },
-              ],
-            },
-            {
-              label: 'Example 2',
-              facts: [
-                'The order has been packed.',
-                'The warehouse has stock.',
-              ],
-              question: 'Can we deliver the order by Friday?',
-              policyTitle: 'Shipping Policy:',
-              policyLines: [
-                'An order can ship if it is packed and the carrier has confirmed pickup.',
-                'The carrier confirms pickup only if a pickup slot has been scheduled.',
-              ],
-              alienLines: [
-                '<span class="t-kw">[RULE]</span> <span class="t-kw">[IF]</span> <span class="t-ent">Threxon</span> <span class="t-true">[TRUE]</span> <span class="t-kw">[AND]</span> <span class="t-ent">Valkris</span> <span class="t-true">[TRUE]</span> <span class="t-kw">[THEN]</span> <span class="t-ent">Zalmex</span> <span class="t-true">[TRUE]</span>',
-                '<span class="t-kw">[RULE]</span> <span class="t-kw">[IF]</span> <span class="t-ent">Noskrel</span> <span class="t-true">[TRUE]</span> <span class="t-kw">[THEN]</span> <span class="t-ent">Valkris</span> <span class="t-true">[TRUE]</span>',
-                '<span class="t-kw">[GIVEN]</span> <span class="t-ent">Threxon</span> <span class="t-true">[TRUE]</span>',
-                '<span class="t-kw">[QUERY]</span> <span class="t-ent">Zalmex</span>',
-              ],
-              traceLines: [
-                '<span class="t-kw">[TRC]</span> 1 <span class="t-ent">Threxon</span> <span class="t-true">[TRUE]</span> needs <span class="t-ent">Valkris</span> <span class="t-true">[TRUE]</span>',
-                '<span class="t-kw">[TRC]</span> 2 <span class="t-ent">Valkris</span> needs <span class="t-ent">Noskrel</span> <span class="t-true">[TRUE]</span>',
-                '<span class="t-kw">[TRC]</span> 3 SCAN: <span class="t-ent">Noskrel</span> → <span class="t-false">NOT FOUND</span>',
-                '<span class="t-kw">[TRC]</span> 4 <span class="t-false">HALT: Insufficient information</span>',
-              ],
-              answerHTML: '<span class="t-answer">Answer: Cannot determine. Missing information: pickup has not been scheduled.</span>',
-              reverseMappings: [
-                { alien: 'Threxon', english: 'order packed' },
-                { alien: 'Valkris', english: 'carrier confirmed' },
-                { alien: 'Noskrel', english: 'pickup scheduled' },
-                { alien: 'Zalmex',  english: 'can ship' },
-              ],
-            },
-            {
-              label: 'Example 3',
-              facts: [
-                'Patient has a fever.',
-                'Patient has a rash.',
-                'Patient does not have a cough.',
-              ],
-              question: 'What is the most likely diagnosis?',
-              policyTitle: 'Diagnostic Protocol:',
-              policyLines: [
-                'Flu requires cough.',
-                'Allergic reactions present without fever.',
-                'Measles presents with fever, rash, and absence of cough.',
-              ],
-              alienLines: [
-                '<span class="t-kw">[RULE]</span> <span class="t-kw">[IF]</span> <span class="t-ent">Grazik</span> <span class="t-true">[TRUE]</span> <span class="t-kw">[THEN]</span> <span class="t-ent">Noskrel</span> <span class="t-true">[TRUE]</span>',
-                '<span class="t-kw">[RULE]</span> <span class="t-kw">[IF]</span> <span class="t-ent">Skalpem</span> <span class="t-true">[TRUE]</span> <span class="t-kw">[THEN]</span> <span class="t-ent">Threxon</span> <span class="t-false">[FALSE]</span>',
-                '<span class="t-kw">[RULE]</span> <span class="t-kw">[IF]</span> <span class="t-ent">Quenthar</span> <span class="t-true">[TRUE]</span> <span class="t-kw">[THEN]</span> <span class="t-ent">Threxon</span> <span class="t-true">[TRUE]</span> <span class="t-ent">Valkris</span> <span class="t-true">[TRUE]</span> <span class="t-ent">Noskrel</span> <span class="t-false">[FALSE]</span>',
-                '<span class="t-kw">[GIVEN]</span> <span class="t-ent">Threxon</span> <span class="t-true">[TRUE]</span> <span class="t-ent">Valkris</span> <span class="t-true">[TRUE]</span> <span class="t-ent">Noskrel</span> <span class="t-false">[FALSE]</span>',
-                '<span class="t-kw">[QUERY]</span> <span class="t-ent">Grazik</span> <span class="t-kw">OR</span> <span class="t-ent">Skalpem</span> <span class="t-kw">OR</span> <span class="t-ent">Quenthar</span>',
-              ],
-              traceLines: [
-                '<span class="t-kw">[TRC]</span> 1 ASSUME<span class="t-dim">:</span> <span class="t-ent">Grazik</span> <span class="t-true">[TRUE]</span>',
-                '<span class="t-kw">[TRC]</span> 2 <span class="t-ent">Grazik</span> → <span class="t-ent">Noskrel</span> <span class="t-true">[TRUE]</span><span class="t-dim">,</span> but given <span class="t-ent">Noskrel</span> <span class="t-false">[FALSE]</span> → <span class="t-false">CONTRADICTION</span>',
-                '<span class="t-kw">[TRC]</span> 3 <span class="t-false">BACKTRACK</span> <span class="t-dim">, flush Grazik</span>',
-                '<span class="t-kw">[TRC]</span> 4 ASSUME<span class="t-dim">:</span> <span class="t-ent">Skalpem</span> <span class="t-true">[TRUE]</span>',
-                '<span class="t-kw">[TRC]</span> 5 <span class="t-ent">Skalpem</span> → <span class="t-ent">Threxon</span> <span class="t-false">[FALSE]</span><span class="t-dim">,</span> but given <span class="t-ent">Threxon</span> <span class="t-true">[TRUE]</span> → <span class="t-false">CONTRADICTION</span>',
-                '<span class="t-kw">[TRC]</span> 6 <span class="t-false">BACKTRACK</span> <span class="t-dim">, flush Skalpem</span>',
-                '<span class="t-kw">[TRC]</span> 7 ASSUME<span class="t-dim">:</span> <span class="t-ent">Quenthar</span> <span class="t-true">[TRUE]</span>',
-                '<span class="t-kw">[TRC]</span> 8 <span class="t-ent">Quenthar</span> → <span class="t-ent">Threxon</span> <span class="t-true">[TRUE]</span> ✓ <span class="t-ent">Valkris</span> <span class="t-true">[TRUE]</span> ✓ <span class="t-ent">Noskrel</span> <span class="t-false">[FALSE]</span> ✓',
-                '<span class="t-kw">[STATE]</span> <span class="t-ent">Quenthar</span> <span class="t-true">[TRUE]</span> ✓',
-              ],
-              answerHTML: '<span class="t-answer">Answer: Measles. Symptoms match: fever ✓, rash ✓, cough [FALSE] ✓</span>',
-              reverseMappings: [
-                { alien: 'Quenthar', english: 'measles' },
-                { alien: 'Grazik',   english: 'flu' },
-                { alien: 'Skalpem',  english: 'allergic reaction' },
-                { alien: 'Threxon',  english: 'fever' },
-                { alien: 'Valkris',  english: 'rash' },
-                { alien: 'Noskrel',  english: 'cough' },
-              ],
-            },
-          ];
-
-          let currentExample = 0;
-          let _cycleGen = 0;
-          let _termCurrentPhase = 'input';
-
-          function cancelCycle() { _cycleGen++; }
-
-          function updateExampleBtns() {
-            document.querySelectorAll('.example-btn').forEach(btn => {
-              btn.classList.toggle('active', parseInt(btn.dataset.example) === currentExample);
-            });
-          }
-
-          // Render a phase instantly (no animation delays) for annotation click-to-jump
-          function renderPhaseInstant(phase) {
-            const ex = EXAMPLES[currentExample];
-            body.innerHTML = '';
-
-            if (phase === 'input') {
-              setAnnotation('ann-input');
-              const labelDiv = document.createElement('div');
-              labelDiv.innerHTML = `<span class="t-dim">${ex.label}</span>`;
-              body.appendChild(labelDiv);
-              ex.facts.forEach(f => {
-                const div = document.createElement('div');
-                div.innerHTML = `<span class="t-dim">  · </span><span class="t-bright">${f}</span>`;
-                body.appendChild(div);
-              });
-              const docDiv = document.createElement('div');
-              docDiv.className = 'term-source-doc';
-              docDiv.innerHTML =
-                `<div class="term-doc-header"><span class="term-doc-emoji">📄</span> <span class="term-doc-title">${ex.policyTitle}</span></div>` +
-                ex.policyLines.map(l => `<div class="term-doc-line">'${l}'</div>`).join('');
-              body.appendChild(docDiv);
-              const qDiv = document.createElement('div');
-              qDiv.style.marginTop = '0.4rem';
-              qDiv.innerHTML = `<span class="t-dim">> </span><span class="t-bright">${ex.question}</span>`;
-              body.appendChild(qDiv);
-            } else if (phase === 'compile') {
-              setAnnotation('ann-compile');
-              ex.alienLines.forEach(html => {
-                const div = document.createElement('div');
-                div.innerHTML = html;
-                body.appendChild(div);
-              });
-            } else if (phase === 'trace') {
-              setAnnotation('ann-trc');
-              ex.alienLines.forEach(html => {
-                const div = document.createElement('div');
-                div.innerHTML = html;
-                body.appendChild(div);
-              });
-              appendLine('<span class="t-dim">────────────────────────────────</span>');
-              ex.traceLines.forEach(tl => appendLine(tl));
-            } else if (phase === 'answer') {
-              setAnnotation('ann-answer');
-              ex.alienLines.forEach(html => {
-                const div = document.createElement('div');
-                div.innerHTML = html;
-                body.appendChild(div);
-              });
-              appendLine('<span class="t-dim">────────────────────────────────</span>');
-              ex.traceLines.forEach(tl => appendLine(tl));
-              appendLine('<span class="t-dim">────────────────────────────────</span>');
-              const ansDiv = document.createElement('div');
-              ansDiv.innerHTML = ex.answerHTML;
-              body.appendChild(ansDiv);
-              appendLine('<span class="t-dim">────────────────────────────────</span>');
-              ex.reverseMappings.forEach(m => {
-                const mapDiv = document.createElement('div');
-                mapDiv.innerHTML = `<span class="t-ent">${m.alien}</span> <span class="t-dim">→</span> <span class="t-bright">${m.english}</span>`;
-                body.appendChild(mapDiv);
-              });
-            }
-          }
-
-          window.switchExample = function(idx) {
-            currentExample = idx;
-            cancelCycle();
-            document.querySelectorAll('.example-btn').forEach(function(b, i) {
-              b.classList.toggle('active', i === idx);
-            });
-            runCycle();
-          };
-
-          async function runCycle() {
-            cancelCycle();
-            const gen = _cycleGen;
-            function alive() { return gen === _cycleGen; }
-            const ex = EXAMPLES[currentExample];
-
-            body.innerHTML = '';
-
-            // ── Phase 1: input ──
-            setAnnotation('ann-input');
-
-            {
-              const labelDiv = document.createElement('div');
-              labelDiv.innerHTML = `<span class="t-dim">${ex.label}</span>`;
-              labelDiv.style.opacity = '0';
-              labelDiv.style.transition = 'opacity 0.4s ease';
-              body.appendChild(labelDiv);
-              requestAnimationFrame(() => requestAnimationFrame(() => { labelDiv.style.opacity = '1'; }));
-            }
-
-            await sleep(400, alive);
-            if (!alive()) return;
-
-            for (let i = 0; i < ex.facts.length; i++) {
-              await sleep(300, alive);
-              if (!alive()) return;
-              const div = document.createElement('div');
-              const prefix = document.createElement('span');
-              prefix.className = 't-dim';
-              prefix.textContent = '  · ';
-              const span = document.createElement('span');
-              span.className = 't-bright';
-              span.textContent = ex.facts[i];
-              div.appendChild(prefix);
-              div.appendChild(span);
-              div.style.opacity = '0';
-              div.style.transition = 'opacity 0.5s ease';
-              body.appendChild(div);
-              requestAnimationFrame(() => requestAnimationFrame(() => { div.style.opacity = '1'; }));
-            }
-
-            await sleep(1000, alive);
-            if (!alive()) return;
-
-            {
-              const docDiv = document.createElement('div');
-              docDiv.className = 'term-source-doc';
-              docDiv.innerHTML =
-                `<div class="term-doc-header"><span class="term-doc-emoji">📄</span> <span class="term-doc-title">${ex.policyTitle}</span></div>` +
-                ex.policyLines.map(l => `<div class="term-doc-line">'<span class="t-morph">${l}</span>'</div>`).join('');
-              docDiv.style.opacity = '0';
-              docDiv.style.transition = 'opacity 0.6s ease';
-              body.appendChild(docDiv);
-              requestAnimationFrame(() => requestAnimationFrame(() => { docDiv.style.opacity = '1'; }));
-            }
-
-            await sleep(1000, alive);
-            if (!alive()) return;
-
-            {
-              const div = document.createElement('div');
-              div.style.marginTop = '0.4rem';
-              const prefix = document.createElement('span');
-              prefix.className = 't-dim';
-              prefix.textContent = '> ';
-              const span = document.createElement('span');
-              span.className = 't-bright';
-              div.appendChild(prefix);
-              div.appendChild(span);
-              body.appendChild(div);
-              await typeInto(span, ex.question, 55);
-            }
-
-            await sleep(800, alive);
-            if (!alive()) return;
-
-            // ── Phase 2: compile ──
-            setAnnotation('ann-compile');
-
-            body.style.transition = 'opacity 0.5s ease';
-            body.style.opacity = '0';
-            await sleep(500, alive);
-            if (!alive()) return;
-            body.innerHTML = '';
-            body.style.transition = '';
-            body.style.opacity = '1';
-
-            const alienContainer = document.createElement('div');
-            body.appendChild(alienContainer);
-
-            const totalDecodeDuration = 2400;
-            const perLineDuration = totalDecodeDuration / ex.alienLines.length;
-
-            for (const html of ex.alienLines) {
-              if (!alive()) return;
-              const div = document.createElement('div');
-              const tmp = document.createElement('div');
-              tmp.innerHTML = html;
-              const plain = tmp.textContent;
-              div.textContent = plain.split('').map(c => c === ' ' ? ' ' : rg()).join('');
-              alienContainer.appendChild(div);
-              await new Promise(resolve => scrambleDecode(div, html, perLineDuration, resolve));
-            }
-
-            await sleep(400, alive);
-            if (!alive()) return;
-
-            // ── Phase 3: trace ──
-            setAnnotation('ann-trc');
-            appendLine('<span class="t-dim">────────────────────────────────</span>');
-            for (const tl of ex.traceLines) {
-              await sleep(1500, alive);
-              if (!alive()) return;
-              appendLine(tl);
-            }
-
-            await sleep(800, alive);
-            if (!alive()) return;
-
-            // ── Phase 4: answer ──
-            setAnnotation('ann-answer');
-            appendLine('<span class="t-dim">────────────────────────────────</span>');
-
-            await sleep(600, alive);
-            if (!alive()) return;
-
-            const ansDiv = document.createElement('div');
-            const tmp2 = document.createElement('div');
-            tmp2.innerHTML = ex.answerHTML;
-            ansDiv.textContent = tmp2.textContent.split('').map(c => c === ' ' ? ' ' : rg()).join('');
-            body.appendChild(ansDiv);
-            await sleep(200, alive);
-            if (!alive()) return;
-            await new Promise(resolve => scrambleDecode(ansDiv, ex.answerHTML, 1200, resolve));
-            if (!alive()) return;
-
-            // ── Phase 5: reverse mappings ──
-            await sleep(600, alive);
-            if (!alive()) return;
-            appendLine('<span class="t-dim">────────────────────────────────</span>');
-
-            for (const m of ex.reverseMappings) {
-              await sleep(400, alive);
-              if (!alive()) return;
-              const mapDiv = document.createElement('div');
-              const englishSpan = document.createElement('span');
-              englishSpan.className = 't-bright';
-              englishSpan.textContent = m.english.split('').map(c => c === ' ' ? ' ' : rg()).join('');
-              mapDiv.innerHTML = `<span class="t-ent">${m.alien}</span> <span class="t-dim">→</span> `;
-              mapDiv.appendChild(englishSpan);
-              mapDiv.style.opacity = '0';
-              mapDiv.style.transition = 'opacity 0.3s ease';
-              body.appendChild(mapDiv);
-              requestAnimationFrame(() => requestAnimationFrame(() => { mapDiv.style.opacity = '1'; }));
-              await sleep(100, alive);
-              if (!alive()) return;
-              await new Promise(resolve => scrambleDecode(englishSpan, m.english, 600, resolve));
-              if (!alive()) return;
-            }
-
-            // ── Phase 6: translate alien names in rules + trace back to English ──
-            await sleep(800, alive);
-            if (!alive()) return;
-            await runTranslationPhase(alive);
-            if (!alive()) return;
-
-            await sleep(3000, alive);
-            if (!alive()) return;
-            currentExample = (currentExample + 1) % EXAMPLES.length;
-            updateExampleBtns();
-            runCycle();
-          }
-
-          // ── Run cycle from a specific phase (used by annotation click) ──
-          async function runCycleFromPhase(startPhase) {
-            if (startPhase === 'input') { runCycle(); return; }
-            cancelCycle();
-            const gen = _cycleGen;
-            function alive() { return gen === _cycleGen; }
-            const ex = EXAMPLES[currentExample];
-
-            body.innerHTML = '';
-
-            // Render alien lines (compile output) — needed by trace + answer phases
-            function renderAlienStatic() {
-              ex.alienLines.forEach(html => {
-                const d = document.createElement('div'); d.innerHTML = html; body.appendChild(d);
-              });
-            }
-
-            if (startPhase === 'compile') {
-              setAnnotation('ann-compile');
-              const alienContainer = document.createElement('div');
-              body.appendChild(alienContainer);
-              const perLineDuration = 2400 / ex.alienLines.length;
-              for (const html of ex.alienLines) {
-                if (!alive()) return;
-                const div = document.createElement('div');
-                const tmp = document.createElement('div'); tmp.innerHTML = html;
-                div.textContent = tmp.textContent.split('').map(c => c === ' ' ? ' ' : rg()).join('');
-                alienContainer.appendChild(div);
-                await new Promise(resolve => scrambleDecode(div, html, perLineDuration, resolve));
-              }
-              await sleep(400, alive); if (!alive()) return;
-            } else {
-              renderAlienStatic();
-            }
-
-            if (startPhase === 'compile' || startPhase === 'trace') {
-              setAnnotation('ann-trc');
-              appendLine('<span class="t-dim">────────────────────────────────</span>');
-              for (const tl of ex.traceLines) {
-                await sleep(1500, alive); if (!alive()) return;
-                appendLine(tl);
-              }
-              await sleep(800, alive); if (!alive()) return;
-            } else {
-              // answer phase — render trace statically
-              appendLine('<span class="t-dim">────────────────────────────────</span>');
-              ex.traceLines.forEach(tl => appendLine(tl));
-            }
-
-            // ── answer + mappings + translation (shared tail) ──
-            setAnnotation('ann-answer');
-            appendLine('<span class="t-dim">────────────────────────────────</span>');
-            await sleep(600, alive); if (!alive()) return;
-            const ansDiv = document.createElement('div');
-            const tmp2 = document.createElement('div'); tmp2.innerHTML = ex.answerHTML;
-            ansDiv.textContent = tmp2.textContent.split('').map(c => c === ' ' ? ' ' : rg()).join('');
-            body.appendChild(ansDiv);
-            await sleep(200, alive); if (!alive()) return;
-            await new Promise(resolve => scrambleDecode(ansDiv, ex.answerHTML, 1200, resolve));
-            if (!alive()) return;
-
-            await sleep(600, alive); if (!alive()) return;
-            appendLine('<span class="t-dim">────────────────────────────────</span>');
-            for (const m of ex.reverseMappings) {
-              await sleep(400, alive); if (!alive()) return;
-              const mapDiv = document.createElement('div');
-              const englishSpan = document.createElement('span');
-              englishSpan.className = 't-bright';
-              englishSpan.textContent = m.english.split('').map(c => c === ' ' ? ' ' : rg()).join('');
-              mapDiv.innerHTML = `<span class="t-ent">${m.alien}</span> <span class="t-dim">→</span> `;
-              mapDiv.appendChild(englishSpan);
-              mapDiv.style.opacity = '0'; mapDiv.style.transition = 'opacity 0.3s ease';
-              body.appendChild(mapDiv);
-              requestAnimationFrame(() => requestAnimationFrame(() => { mapDiv.style.opacity = '1'; }));
-              await sleep(100, alive); if (!alive()) return;
-              await new Promise(resolve => scrambleDecode(englishSpan, m.english, 600, resolve));
-              if (!alive()) return;
-            }
-
-            await sleep(800, alive); if (!alive()) return;
-            await runTranslationPhase(alive);
-            if (!alive()) return;
-
-            await sleep(3000, alive); if (!alive()) return;
-            currentExample = (currentExample + 1) % EXAMPLES.length;
-            updateExampleBtns();
-            runCycle();
-          }
-
-          // ── Example selector buttons ──
-          document.querySelectorAll('.example-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-              const idx = parseInt(btn.dataset.example);
-              if (isNaN(idx) || idx >= EXAMPLES.length) return;
-              currentExample = idx;
-              cancelCycle();
-              document.querySelectorAll('.example-btn').forEach(function(b, i) {
-                b.classList.toggle('active', i === idx);
-              });
-              runCycle();
-            });
-          });
-
-          // ── Alien-to-English replacement phase ──
-          async function runTranslationPhase(alive) {
-            const ex = EXAMPLES[currentExample];
-            // Collect all alien name spans in the terminal body
-            // We'll replace them one by one with a scramble-decode effect
-            const alienNames = ex.reverseMappings.map(m => m.alien);
-
-            // Find all t-ent spans that contain alien names (in rules + trace lines)
-            const entSpans = Array.from(body.querySelectorAll('.t-ent'));
-
-            // Build a map: alien -> english
-            const alienToEnglish = {};
-            ex.reverseMappings.forEach(m => { alienToEnglish[m.alien] = m.english; });
-
-            // Filter to only spans whose text is a known alien name
-            const toTranslate = entSpans.filter(s => alienToEnglish[s.textContent.trim()]);
-
-            // Translate all at once (parallel scramble-decode, staggered slightly)
-            const promises = toTranslate.map((span, i) => {
-              return new Promise(resolve => {
-                const alien = span.textContent.trim();
-                const english = alienToEnglish[alien];
-                setTimeout(() => {
-                  if (!alive()) { resolve(); return; }
-                  // Replace span class to t-bright for English
-                  span.className = 't-bright';
-                  scrambleDecode(span, english, 350, resolve);
-                }, i * 60);
-              });
-            });
-
-            await Promise.all(promises);
-          }
-
-          // ── Annotation card click-to-jump ──
-          const PHASE_MAP = {
-            'ann-input':   'input',
-            'ann-compile': 'compile',
-            'ann-trc':     'trace',
-            'ann-answer':  'answer',
-          };
-          document.querySelectorAll('.hero-annotation').forEach(ann => {
-            ann.addEventListener('click', () => {
-              const phase = PHASE_MAP[ann.id];
-              if (!phase) return;
-              cancelCycle();
-              renderPhaseInstant(phase);
-              window._termCurrentPhase = phase;
-              if (!window._termPaused) {
-                // resume animation from the clicked phase
-                runCycleFromPhase(phase);
-              }
-            });
-          });
-
-          setTimeout(runCycle, 800);
-        })();
-
-        document.getElementById('term-pause-btn').addEventListener('click', function() {
-          window._termPaused = !window._termPaused;
-          this.textContent = window._termPaused ? '▶' : '⏸';
-          if (!window._termPaused) {
-            runCycleFromPhase(window._termCurrentPhase || 'input');
-          }
-        });
-
-        // Kick off decode after a short delay (let fadeUp settle)
-        setTimeout(runDecodeEffect, 300);
-    </script>
 
 </body>
 </html>
